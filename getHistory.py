@@ -2,6 +2,7 @@
 import urllib2
 import time
 from bs4 import BeautifulSoup
+# from BeautifulSoup import BeautifulSoup
 import MySQLdb
 
 def getBeautifulSoup(url) :
@@ -12,6 +13,7 @@ def getBeautifulSoup(url) :
             req = urllib2.Request(url)
             res = urllib2.urlopen(req, timeout = 15).read()
             return BeautifulSoup(res, "html.parser")
+            # return BeautifulSoup(res)
         except :
             print "Could not get data from " + url
             print "Sleep 3 seconds and retrying ..."
@@ -59,9 +61,9 @@ def insertDB(type, date, time, dataNumber, front3, end3, frontDup4, endDup4, all
         print cur.execute(statement)
         cur.close()
         conn.commit()
-	print " ".join([date, time.strip(), dataNumber, front3, end3, frontDup4, endDup4, allDup])
+        print " ".join([date, time.strip(), dataNumber, front3, end3, frontDup4, endDup4, allDup])
     except MySQLdb.Error,e:
-	print "\tMysql Error %d: %s" % (e.args[0], e.args[1])
+        print "\tMysql Error %d: %s" % (e.args[0], e.args[1])
         pass
 
 def getDataAndrInsertDB(type, page = 1) :
