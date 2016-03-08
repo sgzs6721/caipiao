@@ -15,7 +15,6 @@ def getBeautifulSoup(url) :
             # return BeautifulSoup(res, "html.parser")
             return BeautifulSoup(res)
 
-            # return BeautifulSoup(res)
         except :
             print "Could not get data from " + url
             print "Sleep 3 seconds and retrying ..."
@@ -24,47 +23,33 @@ def getBeautifulSoup(url) :
     return ""
 
 def getUrl(type, category, page) :
+    if type == "11x5" : category = category + type
     url = "http://caipiaow.com/index.php?m=kaijiang&a=index&cz="+ \
     category + "&type=" + type + "&p=" + str(page)
-    print url
     return url
 
-def checkThree(dataNumber) :
-    if dataNumber[0] == dataNumber[1] :
-        return "1"
-    if dataNumber[0] == dataNumber[2] :
-        return "1"
-    if dataNumber[1] == dataNumber[2] :
-        return "1"
-    return "0"
-
-def checkDup(lastNumber, dataNumber) :
-    if lastNumber[0] =="-" :
-        return "0"
-    for i in range(len(lastNumber)) :
-        if lastNumber[i] == dataNumber[i] :
-            return "1"
-    return "0"
-
-def getMaxID(type) :
-    cur = conn.cursor()
-    statement = "select max(ID) from " + type + "ssc;"
-    cur.execute(statement)
-    return cur.fetchone()[0] + 1
-
-def insertDB(type, date, time, dataNumber, front3, end3, frontDup4, endDup4, allDup) :
+def insertDB(type, category, num, datetime, dataNumber) :
     try :
-        ID = str(getMaxID(type))
         cur = conn.cursor()
-        statement = "insert into " + "`" + type + "ssc`"  + \
-        "(`ID`,`date`,`time`,`number`,`front3`,`end3`,`front4`,`end4`,`all`) VALUES ('" + ID + "','" + \
-        date + "','" + time + "','" + dataNumber +"','"+ front3 + "','" + end3 + "','" + \
-        frontDup4 + "','" + endDup4 + "','" + allDup + "')"
 
-        print cur.execute(statement)
+        no        = num[8:]
+        timeArray = time.strptime(datetime, "%Y-%m-%d %H:%M:%S")
+        year      = time.strftime("%Y", timeArray)
+        month     = time.strftime("%m", timeArray)
+        day       = time.strftime("%d", timeArray)
+        weekday   = time.strftime("%w", timeArray)
+        clock     = datetime.split(" ")[1]
+
+        statement = "insert into " + category + type  + \
+        "(`num`,`year`,`month`,`day`, `weekday`,`time`,`no`,`first`,`second`,`third`,`fourth`,`last`) VALUES ('" + \
+        num + "','" + year + "','" + month + "','" + day + "','" + weekday + "','" + clock + "','" + no + "','" + \
+        dataNumber[0] + "','" + dataNumber[1] + "','" + dataNumber[2] + "','" + dataNumber[3] + "','" + dataNumber[4] + "')"
+
+        cur.execute(statement)
         cur.close()
         conn.commit()
-        print " ".join([date, time.strip(), dataNumber, front3, end3, frontDup4, endDup4, allDup])
+        print " ".join([num, year, month, day, weekday, clock, no, dataNumber[0], dataNumber[1], dataNumber[2], dataNumber[3], dataNumber[4]])
+
     except MySQLdb.Error,e:
         print "\tMysql Error %d: %s" % (e.args[0], e.args[1])
         pass
@@ -77,7 +62,6 @@ def getDataAndrInsertDB(type, category, page = 1) :
         exit(1)
     tableTr = soup.findAll("table")[1].findAll("tr")[1:]
     tableTr.reverse()
-    lastNumber = "-----"
     for index, tr in enumerate(tableTr) :
         #if index <= 12 : continue
         td = tr.findAll("td")
@@ -88,11 +72,7 @@ def getDataAndrInsertDB(type, category, page = 1) :
         for span in dataNumberDiv :
             dataNumber.append(span.text.encode("utf8"))
 
-        print " ".join([type, category, date, time, ",".join(dataNumber)])
-        # insertDB(type, date, time, dataNumber, checkThree(dataNumber[0:3]),
-        #          checkThree(dataNumber[2:]), checkDup(lastNumber[0:4], dataNumber[0:4]),
-        #          checkDup(lastNumber[1:5], dataNumber[1:5]), checkDup(lastNumber, dataNumber))
-        lastNumber = ",".join(dataNumber)
+        insertDB(type, category, date, time, dataNumber)
     return
 
 host = "localhost"
@@ -101,15 +81,15 @@ passwd = "1qazxsw2"
 port = 3306
 database = "lottery"
 
-# conn=MySQLdb.connect(host=host,user=user,passwd=passwd,db=database,port=port,charset='utf8')
+conn=MySQLdb.connect(host=host,user=user,passwd=passwd,db=database,port=port,charset='utf8')
 
 pageType = {"ssc":["cq", "xj", "tj"], "11x5": ["jx", "sd", "gd"]}
+pageType = {"ssc":["cq"]}
 
 
 for type in pageType :
     page = 1
     print "Get data from " + type
     for category in pageType[type] :
-        if type == "11x5" : category = category + type
         getDataAndrInsertDB(type, category, page)
-# conn.close()
+conn.close()
