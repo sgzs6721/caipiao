@@ -23,10 +23,10 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- 表的结构 `jxssc`
+-- 表的结构 `gd11x5`
 --
 
-CREATE TABLE IF NOT EXISTS `jxssc` (
+CREATE TABLE IF NOT EXISTS `gd11x5` (
   `ID` int(32) NOT NULL,
   `num` varchar(16) COLLATE utf8_bin NOT NULL,
   `year` year(4) NOT NULL,
@@ -47,9 +47,9 @@ CREATE TABLE IF NOT EXISTS `jxssc` (
 --
 
 --
--- Indexes for table `jxssc`
+-- Indexes for table `gd11x5`
 --
-ALTER TABLE `jxssc`
+ALTER TABLE `gd11x5`
   ADD PRIMARY KEY (`ID`),
   ADD UNIQUE KEY `num` (`num`);
 
@@ -58,9 +58,9 @@ ALTER TABLE `jxssc`
 --
 
 --
--- AUTO_INCREMENT for table `jxssc`
+-- AUTO_INCREMENT for table `gd11x5`
 --
-ALTER TABLE `jxssc`
+ALTER TABLE `gd11x5`
   MODIFY `ID` int(32) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=106;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

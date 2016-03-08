@@ -84,7 +84,7 @@ database = "lottery"
 conn=MySQLdb.connect(host=host,user=user,passwd=passwd,db=database,port=port,charset='utf8')
 
 pageType = {"ssc":["cq", "xj", "tj"], "11x5": ["jx", "sd", "gd"]}
-pageType = {"ssc":["cq"]}
+# pageType = {"ssc":["cq"]}
 
 
 for type in pageType :
