@@ -64,21 +64,31 @@ def getDataAndrInsertDB(type, category, getPages,  page = 1) :
     if getPages :
         pages = soup.find(id='pages').text.encode("utf8").split(" ")[2].split("/")[1]
         return int(pages)
-    else:
 
-        tableTr = soup.findAll("table")[1].findAll("tr")[1:]
+    else:
+        times = 3
+        while times > 0 :
+            try :
+                tableTr = soup.findAll("table")[1].findAll("tr")[1:]
+                times = 0
+            except :
+                print "Get Data Error, try again after 10 seconds ..."
+                time.sleep(10)
+                times = times - 1
+                if times == 0 : exit(1)
         tableTr.reverse()
         for index, tr in enumerate(tableTr) :
             #if index <= 12 : continue
             td = tr.findAll("td")
             date = td[1].span.text.encode("utf8")
-            time = td[2].text.encode("utf8")
+            timeN = td[2].text.encode("utf8")
             dataNumberDiv = td[3].div.findAll("span")
             dataNumber = []
             for span in dataNumberDiv :
                 dataNumber.append(span.text.encode("utf8"))
 
-            insertDB(type, category, date, time, dataNumber)
+            insertDB(type, category, date, timeN, dataNumber)
+
     return
 
 host = "localhost"
@@ -89,15 +99,22 @@ database = "lottery"
 
 conn=MySQLdb.connect(host=host,user=user,passwd=passwd,db=database,port=port,charset='utf8')
 
-pageType = {"ssc":["cq", "xj", "tj"], "11x5": ["jx", "sd", "gd"]}
+pageType = {"ssc":["cq", "xj"], "11x5": ["jx", "sd", "gd"]}
 # pageType = {"ssc":["cq"]}
 
 
 for type in pageType :
     for category in pageType[type] :
         page = getDataAndrInsertDB(type, category, True)
+        minute = "0"
+        if category == "sd" : minute = "7"
         while page > 0 :
             print "Get data(p" + str(page) + ") from " + category + type
             getDataAndrInsertDB(type, category, False, page)
             page = page - 1
+
+            if str(time.localtime()[4])[1:] == "0" :
+                print "Sleeping 180 seconds ......"
+                time.sleep(180)
+                page = page + 1
 conn.close()
