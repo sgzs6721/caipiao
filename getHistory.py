@@ -54,25 +54,31 @@ def insertDB(type, category, num, datetime, dataNumber) :
         print "\tMysql Error %d: %s" % (e.args[0], e.args[1])
         pass
 
-def getDataAndrInsertDB(type, category, page = 1) :
+def getDataAndrInsertDB(type, category, getPages,  page = 1) :
     url = getUrl(type, category, page)
     soup = getBeautifulSoup(url)
     if not soup :
         print "Exit"
         exit(1)
-    tableTr = soup.findAll("table")[1].findAll("tr")[1:]
-    tableTr.reverse()
-    for index, tr in enumerate(tableTr) :
-        #if index <= 12 : continue
-        td = tr.findAll("td")
-        date = td[1].span.text.encode("utf8")
-        time = td[2].text.encode("utf8")
-        dataNumberDiv = td[3].div.findAll("span")
-        dataNumber = []
-        for span in dataNumberDiv :
-            dataNumber.append(span.text.encode("utf8"))
 
-        insertDB(type, category, date, time, dataNumber)
+    if getPages :
+        pages = soup.find(id='pages').text.encode("utf8").split(" ")[2].split("/")[1]
+        return int(pages)
+    else:
+
+        tableTr = soup.findAll("table")[1].findAll("tr")[1:]
+        tableTr.reverse()
+        for index, tr in enumerate(tableTr) :
+            #if index <= 12 : continue
+            td = tr.findAll("td")
+            date = td[1].span.text.encode("utf8")
+            time = td[2].text.encode("utf8")
+            dataNumberDiv = td[3].div.findAll("span")
+            dataNumber = []
+            for span in dataNumberDiv :
+                dataNumber.append(span.text.encode("utf8"))
+
+            insertDB(type, category, date, time, dataNumber)
     return
 
 host = "localhost"
@@ -88,8 +94,10 @@ pageType = {"ssc":["cq", "xj", "tj"], "11x5": ["jx", "sd", "gd"]}
 
 
 for type in pageType :
-    page = 1
-    print "Get data from " + type
     for category in pageType[type] :
-        getDataAndrInsertDB(type, category, page)
+        page = getDataAndrInsertDB(type, category, True)
+        while page > 0 :
+            print "Get data(p" + str(page) + ") from " + category + type
+            getDataAndrInsertDB(type, category, False, page)
+            page = page - 1
 conn.close()
