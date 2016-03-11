@@ -8,7 +8,6 @@ import MySQLdb
 def getBeautifulSoup(url) :
     times = 0
     while times < 10 :
-        # print "The " + str(times + 1) + " times getting data!"
         try :
             req = urllib2.Request(url)
             res = urllib2.urlopen(req, timeout = 15).read()
@@ -31,14 +30,23 @@ def getUrl(type, category, page) :
 def insertDB(type, category, num, datetime, dataNumber) :
     try :
         cur = conn.cursor()
-
         no        = num[8:]
-        timeArray = time.strptime(datetime, "%Y-%m-%d %H:%M:%S")
-        year      = time.strftime("%Y", timeArray)
-        month     = time.strftime("%m", timeArray)
-        day       = time.strftime("%d", timeArray)
-        weekday   = time.strftime("%w", timeArray)
+        # timeArray = time.strptime(datetime, "%Y-%m-%d %H:%M:%S")
+        # year      = time.strftime("%Y", timeArray)
+        # month     = time.strftime("%m", timeArray)
+        # day       = time.strftime("%d", timeArray)
+        # weekday   = time.strftime("%w", timeArray)
         clock     = datetime.split(" ")[1]
+        dateArray = datetime.split(" ")[0].split("-")
+        year      = dateArray[0]
+        month     = dateArray[1]
+        day       = dateArray[2]
+
+        if year == "0000" :
+            weekday = "0"
+        else :
+            timeArray = time.strptime(datetime, "%Y-%m-%d %H:%M:%S")
+            weekday   = time.strftime("%w", timeArray)
 
         statement = "insert into " + category + type  + \
         "(`num`,`year`,`month`,`day`, `weekday`,`time`,`no`,`first`,`second`,`third`,`fourth`,`last`) VALUES ('" + \
@@ -50,11 +58,11 @@ def insertDB(type, category, num, datetime, dataNumber) :
         conn.commit()
         print " ".join([num, year, month, day, weekday, clock, no, dataNumber[0], dataNumber[1], dataNumber[2], dataNumber[3], dataNumber[4]])
 
-    except MySQLdb.Error,e:
+    except MySQLdb.Error, e:
         print "\tMysql Error %d: %s" % (e.args[0], e.args[1])
         pass
 
-def getDataAndrInsertDB(type, category, getPages,  page = 1) :
+def getDataAndInsertDB(type, category, getPages, page = 1) :
 
     times = 3
     while times > 0 :
@@ -74,7 +82,6 @@ def getDataAndrInsertDB(type, category, getPages,  page = 1) :
                 tableTr = soup.findAll("table")[1].findAll("tr")[1:]
                 tableTr.reverse()
                 for index, tr in enumerate(tableTr) :
-                    #if index <= 12 : continue
                     td = tr.findAll("td")
                     date = td[1].span.text.encode("utf8")
                     timeN = td[2].text.encode("utf8")
@@ -100,7 +107,7 @@ passwd = "1qazxsw2"
 port = 3306
 database = "lottery"
 
-conn=MySQLdb.connect(host=host,user=user,passwd=passwd,db=database,port=port,charset='utf8')
+conn = MySQLdb.connect(host=host,user=user,passwd=passwd,db=database,port=port,charset='utf8')
 
 pageType = {"ssc":["cq", "xj"], "11x5": ["jx", "sd", "gd"]}
 # pageType = {"ssc":["tj"]}
@@ -108,16 +115,16 @@ pageType = {"ssc":["cq", "xj"], "11x5": ["jx", "sd", "gd"]}
 
 for type in pageType :
     for category in pageType[type] :
-        page = getDataAndrInsertDB(type, category, True)
+        page = getDataAndInsertDB(type, category, True)
         minute = "0"
         if category == "sd" : minute = "7"
         while page > 0 :
             print "Get data(p" + str(page) + ") from " + category + type
-            getDataAndrInsertDB(type, category, False, page)
+            getDataAndInsertDB(type, category, False, page)
             page = page - 1
 
             if str(time.localtime()[4])[1:] == minute :
-                print "Sleeping 180 seconds ......"
-                time.sleep(180)
+                print "Sleeping 120 seconds ......"
+                time.sleep(120)
                 page = page + 1
 conn.close()
