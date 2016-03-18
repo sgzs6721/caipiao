@@ -30,11 +30,6 @@ def getUrl(type, category, page) :
 def insertDB(type, category, num, datetime, dataNumber) :
     try :
         cur = conn.cursor()
-        # timeArray = time.strptime(datetime, "%Y-%m-%d %H:%M:%S")
-        # year      = time.strftime("%Y", timeArray)
-        # month     = time.strftime("%m", timeArray)
-        # day       = time.strftime("%d", timeArray)
-        # weekday   = time.strftime("%w", timeArray)
 
         clock     = datetime.split(" ")[1]
         year      = num[:4]
