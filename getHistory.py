@@ -30,19 +30,19 @@ def getUrl(type, category, page) :
 def insertDB(type, category, num, datetime, dataNumber) :
     try :
         cur = conn.cursor()
-        no        = num[8:]
         # timeArray = time.strptime(datetime, "%Y-%m-%d %H:%M:%S")
         # year      = time.strftime("%Y", timeArray)
         # month     = time.strftime("%m", timeArray)
         # day       = time.strftime("%d", timeArray)
         # weekday   = time.strftime("%w", timeArray)
-        clock     = datetime.split(" ")[1]
-        dateArray = datetime.split(" ")[0].split("-")
-        year      = dateArray[0]
-        month     = dateArray[1]
-        day       = dateArray[2]
 
-        if year == "0000" :
+        clock     = datetime.split(" ")[1]
+        year      = num[:4]
+        month     = num[4:6]
+        day       = num[6:8]
+        no        = num[8:]
+
+        if datetime[:4] == "0000" :
             weekday = "0"
         else :
             timeArray = time.strptime(datetime, "%Y-%m-%d %H:%M:%S")
@@ -52,7 +52,6 @@ def insertDB(type, category, num, datetime, dataNumber) :
         "(`num`,`year`,`month`,`day`, `weekday`,`time`,`no`,`first`,`second`,`third`,`fourth`,`last`) VALUES ('" + \
         num + "','" + year + "','" + month + "','" + day + "','" + weekday + "','" + clock + "','" + no + "','" + \
         dataNumber[0] + "','" + dataNumber[1] + "','" + dataNumber[2] + "','" + dataNumber[3] + "','" + dataNumber[4] + "')"
-
         cur.execute(statement)
         cur.close()
         conn.commit()
@@ -109,8 +108,8 @@ database = "lottery"
 
 conn = MySQLdb.connect(host=host,user=user,passwd=passwd,db=database,port=port,charset='utf8')
 
-pageType = {"ssc":["cq", "xj"], "11x5": ["jx", "sd", "gd"]}
-# pageType = {"ssc":["tj"]}
+pageType = {"ssc":["cq", "xj"]}
+# pageType = {"ssc":["cq", "tj"], "11x5": ["sd"]}
 
 
 for type in pageType :
@@ -118,6 +117,7 @@ for type in pageType :
         page = getDataAndInsertDB(type, category, True)
         minute = "0"
         if category == "sd" : minute = "7"
+        if category == "cq" : page = 2343
         while page > 0 :
             print "Get data(p" + str(page) + ") from " + category + type
             getDataAndInsertDB(type, category, False, page)
