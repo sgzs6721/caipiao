@@ -53,7 +53,7 @@ def insertDB(type, category, num, datetime, dataNumber) :
         print " ".join([num, year, month, day, weekday, clock, no, dataNumber[0], dataNumber[1], dataNumber[2], dataNumber[3], dataNumber[4]])
 
     except MySQLdb.Error, e:
-        print "\tMysql Error %d: %s" % (e.args[0], e.args[1])
+        # print "\tMysql Error %d: %s" % (e.args[0], e.args[1])
         pass
 
 def getDataAndInsertDB(type, category, getPages, page = 1) :
@@ -103,23 +103,23 @@ database = "lottery"
 
 conn = MySQLdb.connect(host=host,user=user,passwd=passwd,db=database,port=port,charset='utf8')
 
+# pageType = {"11x5" :["gd", "jx"]}
 pageType = {"ssc":["cq", "xj"]}
-# pageType = {"ssc":["cq", "tj"], "11x5": ["sd"]}
 
 
 for type in pageType :
     for category in pageType[type] :
         page = getDataAndInsertDB(type, category, True)
+        # page = 500
         minute = "0"
-        if category == "sd" : minute = "7"
-        if category == "cq" : page = 2343
+        # if category == "sd" : minute = "5"
         while page > 0 :
             print "Get data(p" + str(page) + ") from " + category + type
             getDataAndInsertDB(type, category, False, page)
             page = page - 1
 
             if str(time.localtime()[4])[1:] == minute :
-                print "Sleeping 120 seconds ......"
-                time.sleep(120)
+                print "Sleeping 150 seconds ......"
+                time.sleep(100)
                 page = page + 1
 conn.close()
