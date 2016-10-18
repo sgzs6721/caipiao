@@ -39,6 +39,10 @@ def insertDB(type, category, num, datetime, dataNumber) :
 
         if datetime[:4] == "0000" :
             weekday = "0"
+
+        if datetime[:5] == "-0001" :
+            weekday = "0"
+            year = "2016"
         else :
             timeArray = time.strptime(datetime, "%Y-%m-%d %H:%M:%S")
             weekday   = time.strftime("%w", timeArray)
@@ -103,23 +107,21 @@ database = "lottery"
 
 conn = MySQLdb.connect(host=host,user=user,passwd=passwd,db=database,port=port,charset='utf8')
 
-pageType = {"ssc":["cq", "xj"]}
-# pageType = {"ssc":["cq", "tj"], "11x5": ["sd"]}
+pageType = {"ssc":["xj"]}
 
 
 for type in pageType :
     for category in pageType[type] :
         page = getDataAndInsertDB(type, category, True)
         minute = "0"
-        if category == "sd" : minute = "7"
-        if category == "cq" : page = 2343
+        page = 240
+
         while page > 0 :
             print "Get data(p" + str(page) + ") from " + category + type
             getDataAndInsertDB(type, category, False, page)
             page = page - 1
-
-            if str(time.localtime()[4])[1:] == minute :
-                print "Sleeping 120 seconds ......"
-                time.sleep(120)
-                page = page + 1
+            #if str(time.localtime()[4])[1:] == minute or str(time.localtime()[4])[1:] == '0' :
+            #    print "Sleeping 120 seconds ......"
+            #    time.sleep(120)
+            #    page = page + 1
 conn.close()
